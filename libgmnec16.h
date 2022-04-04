@@ -48,6 +48,7 @@ extern "C"
 #define GM_NEC16_PC 15
 
 #define GM_NEC16_ADDRINVALID -3
+#define GM_NEC16_INSTRUCTIONINVALID -2
 #define GM_NEC16_UNKNOWN_ERROR -1
 
 typedef int(*GM_NEC16_BusWriteFunc)(void*, uint16_t, uint8_t);
@@ -113,7 +114,7 @@ int gmnec16_eops(GM_NEC16* nec, GM_NEC16_Instr instr)
                                 nec->regs[GM_NEC16_CONDRES] = 1;
                         }
                         break;
-                        
+                
                 /* Immediate Extension Opcode | SET rA, immval */
                 case 0x4:
                 {
@@ -149,22 +150,29 @@ int gmnec16_eops(GM_NEC16* nec, GM_NEC16_Instr instr)
                         {
                                 return GM_NEC16_INSTRUCTIONINVALID;
                         }
-                        int bus_stat = 0;
-                        uint8_t word0;
-                        uint8_t word1;
-
-                        bus_stat = nec->bus_read(nec->data, nec->regs[GM_NEC16_PC], &word0);
-                        if(bus_stat < 0)
+                        if(nec->regs[GM_NEC16_CONDRES] == 0)
                         {
-                                return bus_stat;
-                        }
-                        bus_stat = nec->bus_read(nec->data, nec->regs[GM_NEC16_PC] + 1, &word1);
-                        if(bus_stat < 0)
-                        {
-                                return bus_stat;
-                        }
+                                int bus_stat = 0;
+                                uint8_t word0;
+                                uint8_t word1;
 
-                        nec->regs[GM_NEC16_PC] = (uint16_t)word0 | ((uint16_t)word1 << 8);
+                                bus_stat = nec->bus_read(nec->data, nec->regs[GM_NEC16_PC], &word0);
+                                if(bus_stat < 0)
+                                {
+                                        return bus_stat;
+                                }
+                                bus_stat = nec->bus_read(nec->data, nec->regs[GM_NEC16_PC] + 1, &word1);
+                                if(bus_stat < 0)
+                                {
+                                        return bus_stat;
+                                }
+
+                                nec->regs[GM_NEC16_PC] = (uint16_t)word0 | ((uint16_t)word1 << 8);
+                        }
+                        else
+                        {
+                                nec->regs[GM_NEC16_PC] += 2;
+                        }
 
                 }
                         break;
@@ -289,13 +297,12 @@ int gmnec16_instr_step(GM_NEC16* nec)
 
         if(nec->regs[GM_NEC16_PC] == 0xffff)
         {
-                return GM_NEC16_ADDRINVALID;
+                return GM_NEC16_INSTRUCTIONINVALID;
         }
 
         #define check(r) if((r) < 0) { return (r); }
         uint8_t instr0 = 0;
         uint8_t instr1 = 0;
-
         int bus_stat;
         bus_stat = nec->bus_read(nec->data, nec->regs[GM_NEC16_PC], &instr0);
         check(bus_stat);
@@ -311,22 +318,22 @@ int gmnec16_instr_step(GM_NEC16* nec)
 
         gmnec16_opf opfs[] = {
 
-                gmnec16_eops, // 0 (with 4 opcodes)
-                gmnec16_jmp, // 1
-                gmnec16_gm, // 2
-                gmnec16_sm, // 3
-                gmnec16_or, // 4
-                gmnec16_orr, // 5
-                gmnec16_and, // 6
-                gmnec16_xor, // 7
-                gmnec16_not, // 8
-                gmnec16_shl, // 9
-                gmnec16_shr, // 10
-                gmnec16_add, // 11
-                gmnec16_sub, // 12
-                gmnec16_mul, // 13
-                gmnec16_div, // 14
-                gmnec16_mod, // 15
+                gmnec16_eops, /* 0 (with 4 opcodes + 2 IE opcodes) */
+                gmnec16_jmp, /* 1 */
+                gmnec16_gm, /* 2 */
+                gmnec16_sm, /* 3 */
+                gmnec16_or, /* 4 */
+                gmnec16_orr, /* 5 */
+                gmnec16_and, /* 6 */
+                gmnec16_xor, /* 7 */
+                gmnec16_not, /* 8 */
+                gmnec16_shl, /* 9 */
+                gmnec16_shr, /* 10 */
+                gmnec16_add, /* 11 */
+                gmnec16_sub, /* 12 */
+                gmnec16_mul, /* 13 */
+                gmnec16_div, /* 14 */
+                gmnec16_mod, /* 15 */
 
         };
 
