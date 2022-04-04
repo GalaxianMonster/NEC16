@@ -155,7 +155,7 @@ int gmnec16_sm(GM_NEC16* nec, GM_NEC16_Instr instr)
 
 int gmnec16_or(GM_NEC16* nec, GM_NEC16_Instr instr)
 {
-        nec->regs[instr.regA] |= instr.immval;
+        nec->regs[instr.regA] |= instr.immval & 0xff;
         return 0;
 }
 
