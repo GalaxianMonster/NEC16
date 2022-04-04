@@ -4,7 +4,7 @@
 # Specs
 RAM Space: 64 KiB (65536 B) <br>
 Register Count: 16 <br>
-Opcodes: 21 <br>
+Opcodes: 19 <br>
 Easy to emulate?: Yes <br>
 Clock cyles per second: Undefined (Remember, this is just an Instruction Set) <br>
 Interrupts: No, use memory. <br>
