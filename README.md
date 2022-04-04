@@ -2,7 +2,7 @@
 16 bit Non Existant CPU (No, just an instruction set)
 
 # Specs
-RAM Space: 64 KiB (65536 B) <br>
+RAM Space: Up to 64 KiB (Use memory banks for more bytes) <br>
 Register Count: 16 <br>
 Opcodes: 19 <br>
 Easy to emulate?: Yes <br>
