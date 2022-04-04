@@ -241,8 +241,11 @@ int gmnec16_instr_step(GM_NEC16* nec)
         uint8_t instr0 = 0;
         uint8_t instr1 = 0;
 
-        check(nec->bus_read(nec->data, nec->regs[GM_NEC16_PC], &instr0));
-        check(nec->bus_read(nec->data, nec->regs[GM_NEC16_PC] + 1, &instr1));
+        int bus_stat;
+        bus_stat = nec->bus_read(nec->data, nec->regs[GM_NEC16_PC], &instr0)
+        check(bus_stat);
+        bus_stat = nec->bus_read(nec->data, nec->regs[GM_NEC16_PC] + 1, &instr1)
+        check(bus_stat);
 
         GM_NEC16_Instr instr;
         instr.opcode = (instr0 & 0xf0) >> 4;
