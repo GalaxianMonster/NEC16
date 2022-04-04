@@ -113,6 +113,61 @@ int gmnec16_eops(GM_NEC16* nec, GM_NEC16_Instr instr)
                                 nec->regs[GM_NEC16_CONDRES] = 1;
                         }
                         break;
+                        
+                /* Immediate Extension Opcode | SET rA, immval */
+                case 0x4:
+                {
+                        if(nec->regs[GM_NEC16_PC] == 0xffff)
+                        {
+                                return GM_NEC16_INSTRUCTIONINVALID;
+                        }
+                        int bus_stat = 0;
+                        uint8_t word0;
+                        uint8_t word1;
+
+                        bus_stat = nec->bus_read(nec->data, nec->regs[GM_NEC16_PC], &word0);
+                        if(bus_stat < 0)
+                        {
+                                return bus_stat;
+                        }
+                        bus_stat = nec->bus_read(nec->data, nec->regs[GM_NEC16_PC] + 1, &word1);
+                        if(bus_stat < 0)
+                        {
+                                return bus_stat;
+                        }
+
+                        nec->regs[instr.regB] = (uint16_t)word0 | ((uint16_t)word1 << 8);
+                        nec->regs[GM_NEC16_PC] += 2;
+                }
+                        break;
+
+                /* Immediate Extension Opcode | JMP immval */
+                case 0x5:
+                {
+
+                        if(nec->regs[GM_NEC16_PC] == 0xffff)
+                        {
+                                return GM_NEC16_INSTRUCTIONINVALID;
+                        }
+                        int bus_stat = 0;
+                        uint8_t word0;
+                        uint8_t word1;
+
+                        bus_stat = nec->bus_read(nec->data, nec->regs[GM_NEC16_PC], &word0);
+                        if(bus_stat < 0)
+                        {
+                                return bus_stat;
+                        }
+                        bus_stat = nec->bus_read(nec->data, nec->regs[GM_NEC16_PC] + 1, &word1);
+                        if(bus_stat < 0)
+                        {
+                                return bus_stat;
+                        }
+
+                        nec->regs[GM_NEC16_PC] = (uint16_t)word0 | ((uint16_t)word1 << 8);
+
+                }
+                        break;
 
                 default:
                         break;
