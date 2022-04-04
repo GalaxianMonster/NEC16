@@ -121,7 +121,10 @@ int gmnec16_eops(GM_NEC16* nec, GM_NEC16_Instr instr)
 
 int gmnec16_jmp(GM_NEC16* nec, GM_NEC16_Instr instr)
 {
-        nec->regs[GM_NEC16_PC] = nec->regs[instr.regA];
+        if(nec->regs[GM_NEC16_CONDRES] == 0)
+        {
+                nec->regs[GM_NEC16_PC] = nec->regs[instr.regA];
+        }
         return 0;
 }
 
