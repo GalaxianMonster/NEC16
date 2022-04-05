@@ -36,7 +36,7 @@ extern "C"
  * NEC 16 Specification
  *
  *    RAM: Up to 64 KiB
- *    Opcodes: 21 (Total) (19 base opcodes + 2 IE opcodes)
+ *    Opcodes: 21 (Total) (19 base opcodes + 4 IE opcodes)
  *    Registers: 16 (only 16-bit)
  *
  *
@@ -177,6 +177,20 @@ int gmnec16_eops(GM_NEC16* nec, GM_NEC16_Instr instr)
                 }
                         break;
 
+                /* Immediate Extension Opcode | CP rA, rB */
+                case 0x6:
+                        nec->regs[instr.regB] = nec->regs[realregB];
+                        break;
+
+                /* Immediate Extension Opcode | SWAP rA, rB */
+                case 0x7:
+                {
+                        uint16_t tmp = nec->regs[instr.regB];
+                        nec->regs[instr.regB] = nec->regs[realregB];
+                        nec->regs[realregB] = tmp;
+                }
+                        break;
+                
                 default:
                         break;
         }
