@@ -11,7 +11,7 @@ Interrupts: No, use memory. <br>
 I/O: Memory Mapped I/O could be used (Port Mapped I/O not supported) <br>
 Graphics: Implement it your own with MMIO (Memory Mapped I/O). <br>
 Audio: Use MMIO. <br>
-Mnemonics: nop, eq, gt, lt, set(IE), jmp(IE), cp(IE), swap(IE), ujmp(IE), jmp, gm, sm, or, orr, and, xor, not, shl, shr, add, sub, mul, div, mod <br>
+Mnemonics: nop, eq, gt, lt, set(IE), jmp(IE), cp(IE), swap(IE), ujmp(IE), jmp, gm, sm, or, orr, and, xor, not, shl, shr, add, sub, mul, div, mod (might also add stack instructions like call, ret, push, pop) <br>
 CISC or RISC: I don't know, maybe RISC.
 
 # Some questions/phrases/sentences you might ask/say
