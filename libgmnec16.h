@@ -22,6 +22,8 @@
  * 
 */
 
+/* Code for C99 standard, use libgmnec16c89.h for C89 standard code */
+
 #ifndef LIBGMNEC16_HEADER
 #define LIBGMNEC16_HEADER
 
@@ -36,7 +38,7 @@ extern "C"
  * NEC 16 Specification
  *
  *    RAM: Up to 64 KiB
- *    Opcodes: 24 (Total) (19 base opcodes + 5 IE opcodes)
+ *    Opcodes: 24 (Total) (19 base opcodes + 5 IE opcodes + 6 SE opcodes + 2 ME opcodes)
  *    Registers: 16 (only 16-bit)
  *
  *
@@ -46,10 +48,14 @@ extern "C"
 #define GM_NEC16_INDEX 1
 #define GM_NEC16_CONDRES 2
 #define GM_NEC16_PC 15
+#define GM_NEC16_SP 13
+#define GM_NEC16_SB 12
 
 #define GM_NEC16_ADDRINVALID -3
 #define GM_NEC16_INSTRUCTIONINVALID -2
 #define GM_NEC16_UNKNOWN_ERROR -1
+
+#define gmnec16_err_check_0(x) if(x<0){return x;}
 
 typedef int(*GM_NEC16_BusWriteFunc)(void*, uint16_t, uint8_t);
 typedef int(*GM_NEC16_BusReadFunc)(void*, uint16_t, uint8_t*);
@@ -219,6 +225,154 @@ int gmnec16_eops(GM_NEC16* nec, GM_NEC16_Instr instr)
 
                 }
                         break;
+
+                /* Stack Extension (SE) and Memory Extension (ME) (or the SME update) Opcodes */
+                /* PUSH immval */
+                /* PUSH reg */
+                /* POP reg */
+                /* CALL addr */
+                /* CALL reg */
+                /* RET */
+                /* SET reg, addr */
+                /* SET addr, reg */
+                /* And more soon */
+                case 0x9:
+                        switch(instr.regB)
+                        {
+                                /* (SE) PUSH immval */
+                                case 0x0:
+                                {
+                                        int bus_stat;
+                                        uint8_t word0;
+                                        uint8_t word1;
+                                        bus_stat = nec->bus_read(nec->data, nec->regs[GM_NEC16_PC], &word0);
+                                        gmnec16_err_check_0(bus_stat);
+                                        bus_stat = nec->bus_read(nec->data, nec->regs[GM_NEC16_PC] + 1, &word1);
+                                        gmnec16_err_check_0(bus_stat);
+                                        bus_stat = nec->bus_write(nec->data, nec->regs[GM_NEC16_SP], word0);
+                                        gmnec16_err_check_0(bus_stat);
+                                        bus_stat = nec->bus_write(nec->data, nec->regs[GM_NEC16_SP] + 1, word1);
+                                        gmnec16_err_check_0(bus_stat);
+                                        nec->regs[GM_NEC16_PC] += 2;
+                                        nec->regs[GM_NEC16_SP] += 2;
+                                }
+                                        break;
+                                /* (SE) PUSH reg */
+                                case 0x1:
+                                {
+                                        int bus_stat;
+                                        uint8_t word0 = nec->regs[realregB] & 0xff;
+                                        uint8_t word1 = (nec->regs[realregB] & 0xff00) >> 8;
+                                        bus_stat = nec->bus_write(nec->data, nec->regs[GM_NEC16_SP], word0);
+                                        gmnec16_err_check_0(bus_stat);
+                                        bus_stat = nec->bus_write(nec->data, nec->regs[GM_NEC16_SP] + 1, word1);
+                                        gmnec16_err_check_0(bus_stat);
+                                        nec->regs[GM_NEC16_SP] += 2;
+                                }
+                                        break;
+                                /* (SE) POP reg */
+                                case 0x2:
+                                {
+                                        int bus_stat;
+                                        uint8_t word0;
+                                        uint8_t word1;
+                                        bus_stat = nec->bus_read(nec->data, nec->regs[GM_NEC16_SP] - 1, &word1);
+                                        gmnec16_err_check_0(bus_stat);
+                                        bus_stat = nec->bus_read(nec->data, nec->regs[GM_NEC16_SP] - 2, &word0);
+                                        gmnec16_err_check_0(bus_stat);
+                                        nec->regs[realregB] = ((uint16_t)word0) | ((uint16_t)word1 << 8);
+                                        nec->regs[GM_NEC16_SP] -= 2;
+                                }
+                                        break;
+                                /* (SE) CALL addr */
+                                case 0x3:
+                                {
+                                        int bus_stat;
+                                        uint8_t word0 = (uint8_t)((nec->regs[GM_NEC16_PC] + 2) & 0xff);
+                                        uint8_t word1 = (uint8_t)(((nec->regs[GM_NEC16_PC] + 2) & 0xff00) >> 8);
+                                        bus_stat = nec->bus_write(nec->data, nec->regs[GM_NEC16_SP], word0);
+                                        gmnec16_err_check_0(bus_stat);
+                                        bus_stat = nec->bus_write(nec->data, nec->regs[GM_NEC16_SP] + 1, word1);
+                                        gmnec16_err_check_0(bus_stat);
+                                        bus_stat = nec->bus_read(nec->data, nec->regs[GM_NEC16_PC], &word0);
+                                        gmnec16_err_check_0(bus_stat);
+                                        bus_stat = nec->bus_read(nec->data, nec->regs[GM_NEC16_PC] + 1, &word1);
+                                        gmnec16_err_check_0(bus_stat);
+                                        nec->regs[GM_NEC16_PC] = ((uint16_t)word0) | ((uint16_t)word1 << 8);
+                                        nec->regs[GM_NEC16_SP] += 2;
+                                }
+                                        break;
+                                /* (SE) CALL reg */
+                                case 0x4:
+                                {
+                                        int bus_stat;
+                                        uint8_t word0 = (uint8_t)((nec->regs[GM_NEC16_PC]) & 0xff);
+                                        uint8_t word1 = (uint8_t)(((nec->regs[GM_NEC16_PC]) & 0xff00) >> 8);
+                                        bus_stat = nec->bus_write(nec->data, nec->regs[GM_NEC16_SP], word0);
+                                        gmnec16_err_check_0(bus_stat);
+                                        bus_stat = nec->bus_write(nec->data, nec->regs[GM_NEC16_SP] + 1, word1);
+                                        gmnec16_err_check_0(bus_stat);
+                                        nec->regs[GM_NEC16_PC] = nec->regs[realregB];
+                                        nec->regs[GM_NEC16_SP] += 2;
+                                }
+                                        break;
+                                /* (SE) RET */
+                                case 0x5:
+                                {
+                                        int bus_stat;
+                                        uint8_t word0;
+                                        uint8_t word1;
+                                        bus_stat = nec->bus_read(nec->data, nec->regs[GM_NEC16_SP] - 1, &word1);
+                                        gmnec16_err_check_0(bus_stat);
+                                        bus_stat = nec->bus_read(nec->data, nec->regs[GM_NEC16_SP] - 2, &word0);
+                                        gmnec16_err_check_0(bus_stat);
+                                        nec->regs[GM_NEC16_SP] -= 2;
+                                        nec->regs[GM_NEC16_PC] = ((uint16_t)word0) | ((uint16_t)word1 << 8);
+                                }
+                                        break;
+                                /* (ME) SET addr, reg (basically SM reg but without using index reg) */
+                                case 0x6:
+                                {
+                                        int bus_stat;
+                                        uint8_t word0;
+                                        uint8_t word1;
+                                        bus_stat = nec->bus_read(nec->data, nec->regs[GM_NEC16_PC], &word0);
+                                        gmnec16_err_check_0(bus_stat);
+                                        bus_stat = nec->bus_read(nec->data, nec->regs[GM_NEC16_PC] + 1, &word1);
+                                        gmnec16_err_check_0(bus_stat);
+                                        uint16_t addr_word = (uint16_t)word0 | (((uint16_t)word1) << 8);
+                                        bus_stat = nec->bus_write(nec->data, addr_word, (uint8_t)(nec->regs[realregB] & 0xff));
+                                        gmnec16_err_check_0(bus_stat);
+                                        bus_stat = nec->bus_write(nec->data, addr_word + 1, (uint8_t)((nec->regs[realregB] & 0xff00) >> 8));
+                                        gmnec16_err_check_0(bus_stat);
+                                        nec->regs[GM_NEC16_PC] += 2;
+                                }
+                                        break;
+                                /* (ME) SET reg, addr */
+                                case 0x7:
+                                {
+                                        int bus_stat;
+                                        uint8_t word0;
+                                        uint8_t word1;
+                                        bus_stat = nec->bus_read(nec->data, nec->regs[GM_NEC16_PC], &word0);
+                                        gmnec16_err_check_0(bus_stat);
+                                        bus_stat = nec->bus_read(nec->data, nec->regs[GM_NEC16_PC] + 1, &word1);
+                                        gmnec16_err_check_0(bus_stat);
+                                        uint16_t addr_word = (uint16_t)word0 | (((uint16_t)word1) << 8);
+                                        bus_stat = nec->bus_write(nec->data, addr_word, word0);
+                                        gmnec16_err_check_0(bus_stat);
+                                        bus_stat = nec->bus_write(nec->data, addr_word + 1, word1);
+                                        gmnec16_err_check_0(bus_stat);
+                                        uint16_t addr_val_word = (uint16_t)word0 | (((uint16_t)word1) << 8);
+                                        nec->regs[realregB] = addr_val_word;
+                                        nec->regs[GM_NEC16_PC] += 2;
+                                }
+                                        break;
+                                default:
+                                        break;
+                                /* More ME opcodes soon */
+
+                        }
                 
                 default:
                         break;
@@ -361,7 +515,7 @@ int gmnec16_instr_step(GM_NEC16* nec)
 
         gmnec16_opf opfs[] = {
 
-                gmnec16_eops, /* 0 (with 4 opcodes + 2 IE opcodes) */
+                gmnec16_eops, /* 0 (with 4 base opcodes + 5 IE opcodes + 6 SE opcodes + 2 ME opcodes) */
                 gmnec16_jmp, /* 1 */
                 gmnec16_gm, /* 2 */
                 gmnec16_sm, /* 3 */
