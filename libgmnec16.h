@@ -38,7 +38,7 @@ extern "C"
  * NEC 16 Specification
  *
  *    RAM: Up to 64 KiB
- *    Opcodes: 24 (Total) (19 base opcodes + 5 IE opcodes + 6 SE opcodes + 2 ME opcodes)
+ *    Opcodes: 32 (Total) (19 base opcodes + 5 IE opcodes + 6 SE opcodes + 2 ME opcodes)
  *    Registers: 16 (only 16-bit)
  *
  *
