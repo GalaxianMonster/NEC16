@@ -4,14 +4,14 @@
 # Specs
 RAM Space: Up to 64 KiB (Use memory banks for more bytes) <br>
 Register Count: 16 <br>
-Opcodes: 24 <br>
+Opcodes: 32 <br>
 Easy to emulate?: Yes <br>
 Clock cyles per second: Undefined (Remember, this is just an Instruction Set) <br>
 Interrupts: No, use memory. <br>
 I/O: Memory Mapped I/O could be used (Port Mapped I/O not supported) <br>
 Graphics: Implement it your own with MMIO (Memory Mapped I/O). <br>
 Audio: Use MMIO. <br>
-Mnemonics: nop, eq, gt, lt, set(IE), jmp(IE), cp(IE), swap(IE), ujmp(IE), jmp, gm, sm, or, orr, and, xor, not, shl, shr, add, sub, mul, div, mod <br>
+Mnemonics: nop, eq, gt, lt, set(IE), jmp(IE), cp(IE), swap(IE), ujmp(IE), push (SE), pop (SE), call (SE), ret (SE), set (ME) , jmp, gm, sm, or, orr, and, xor, not, shl, shr, add, sub, mul, div, mod <br>
 CISC or RISC: I don't know, maybe RISC.
 
 # Some questions/phrases/sentences you might ask/say
