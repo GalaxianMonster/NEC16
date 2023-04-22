@@ -22,7 +22,7 @@
  * 
 */
 
-/* Code for C99 standard, use libgmnec16c89.h for C89 standard code */
+/* Use libgmnec16c89.h for C89 standard code */
 
 #ifndef LIBGMNEC16_HEADER
 #define LIBGMNEC16_HEADER
