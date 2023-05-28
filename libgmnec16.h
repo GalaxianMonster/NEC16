@@ -359,9 +359,9 @@ int gmnec16_eops(GM_NEC16* nec, GM_NEC16_Instr instr)
                                         bus_stat = nec->bus_read(nec->data, nec->regs[GM_NEC16_PC] + 1, &word1);
                                         gmnec16_err_check_0(bus_stat);
                                         uint16_t addr_word = (uint16_t)word0 | (((uint16_t)word1) << 8);
-                                        bus_stat = nec->bus_write(nec->data, addr_word, word0);
+                                        bus_stat = nec->bus_read(nec->data, addr_word, &word0);
                                         gmnec16_err_check_0(bus_stat);
-                                        bus_stat = nec->bus_write(nec->data, addr_word + 1, word1);
+                                        bus_stat = nec->bus_read(nec->data, addr_word + 1, &word1);
                                         gmnec16_err_check_0(bus_stat);
                                         uint16_t addr_val_word = (uint16_t)word0 | (((uint16_t)word1) << 8);
                                         nec->regs[realregB] = addr_val_word;
