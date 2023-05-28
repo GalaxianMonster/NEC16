@@ -1,5 +1,6 @@
 # NEC16
 16 bit Non Existant CPU (No, just an instruction set)
+<b>WARNING</b>: Please don't use this yet as there might still be bugs, the instruction set isn't finalized yet, when the ISA is finalized, I will start writing the docs.
 
 # Specs
 RAM Space: Up to 64 KiB (Use memory banks for more bytes) <br>
